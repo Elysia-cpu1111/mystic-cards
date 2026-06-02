@@ -294,11 +294,11 @@ export default function Scene3D({
       const yOffset = (i / CARD_COUNT) * 3.5 - 1.75;
 
       const texture = createCardTexture(i);
-      const mat = new THREE.MeshStandardMaterial({
+      const frontTex = createFrontTexture(i);
+      // MeshBasicMaterial — 纹理不受场景灯光影响，画什么显示什么
+      const mat = new THREE.MeshBasicMaterial({
         map: texture,
         side: THREE.DoubleSide,
-        roughness: 0.55,
-        metalness: 0.12,
       });
 
       const card = new THREE.Mesh(cardGeo, mat);
@@ -311,7 +311,7 @@ export default function Scene3D({
         baseAngle,
         baseY: yOffset,
         backTex: texture,
-        frontTex: createFrontTexture(i),
+        frontTex: frontTex,
         selfRotSpeed: 0.1 + Math.random() * 0.2,
         floatOffset: Math.random() * Math.PI * 2,
         tiltX: (Math.random() - 0.5) * 0.12,
