@@ -368,7 +368,7 @@ export default function Scene3D({
 
       // Dynamic rotation speed — faster when open palm held longer
       const baseSpeed = 0.12;
-      const rotSpeed = baseSpeed + (speed - 1) * 1.0;
+      const rotSpeed = baseSpeed + (speed - 1) * 2.0;
       const orbIntensity = 0.5 + (speed - 1) * 0.4;
 
       // Update uniforms

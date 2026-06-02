@@ -17,16 +17,13 @@ export default function App() {
   const [drawnCard, setDrawnCard] = useState(null);
   const palmStartRef = useRef(null);
 
-  // Track open palm duration
+  // Track open palm — instant max speed
   useEffect(() => {
     if (gesture === 'Open_Palm') {
-      if (!palmStartRef.current) palmStartRef.current = Date.now();
-      const elapsed = (Date.now() - palmStartRef.current) / 1000;
-      setOpenPalmDuration(elapsed);
-      setSpeedMultiplier(1 + Math.min(elapsed * 1.5, 5));
+      setSpeedMultiplier(6);  // 瞬间5倍速，牌转成虚影
+      setOpenPalmDuration(prev => prev + 0.1);
     } else {
-      palmStartRef.current = null;
-      if (speedMultiplier > 1 && gesture !== 'Closed_Fist') {
+      if (gesture !== 'Closed_Fist') {
         setSpeedMultiplier(1);
       }
     }
