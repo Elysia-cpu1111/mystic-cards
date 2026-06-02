@@ -23,7 +23,7 @@ export default function App() {
       if (!palmStartRef.current) palmStartRef.current = Date.now();
       const elapsed = (Date.now() - palmStartRef.current) / 1000;
       setOpenPalmDuration(elapsed);
-      setSpeedMultiplier(1 + Math.min(elapsed * 0.8, 3));
+      setSpeedMultiplier(1 + Math.min(elapsed * 1.5, 5));
     } else {
       palmStartRef.current = null;
       if (speedMultiplier > 1 && gesture !== 'Closed_Fist') {
