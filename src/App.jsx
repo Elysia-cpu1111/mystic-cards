@@ -93,6 +93,11 @@ export default function App() {
         openPalmDuration={openPalmDuration}
       />
 
+      {/* ── 抽牌瞬间背景虚化 ── */}
+      {revealedCard !== null && !showFortune && (
+        <div className="draw-blur-overlay" />
+      )}
+
       {/* ── Top HUD ── */}
       <div className="hud-top">
         <h1 className="title">紫 晶 谕 示</h1>

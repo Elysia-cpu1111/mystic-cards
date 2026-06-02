@@ -189,6 +189,22 @@ html, body, #root {
   box-shadow: 0 0 10px #7b4fbf30;
 }
 
+/* ═══ Draw Blur — 抽牌瞬间虚化背景 ═══ */
+.draw-blur-overlay {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(5, 0, 16, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 150;
+  animation: blurIn 0.3s ease;
+  pointer-events: none;
+}
+
+@keyframes blurIn {
+  from { backdrop-filter: blur(0px); background: transparent; }
+  to { backdrop-filter: blur(8px); background: rgba(5, 0, 16, 0.4); }
+}
+
 /* ═══════════════════════════════════════════
    Fortune Panel — 谕示展示
    ═══════════════════════════════════════════ */
