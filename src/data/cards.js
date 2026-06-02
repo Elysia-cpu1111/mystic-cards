@@ -108,103 +108,609 @@ export const CRYSTAL_WHISPERS = [
 // 牌面 Canvas 绘制 — 正面 (插画 + 文字)
 // ═══════════════════════════════════════════════
 
+// ═══════════════════════════════════════════════
+// 牌背 — 每张独立的明亮插画
+// ═══════════════════════════════════════════════
+
 export function drawCardBack(ctx, w, h, seed) {
   ctx.save();
 
-  // 深紫渐变背景
-  const bg = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w * 0.7);
-  bg.addColorStop(0, '#1a0a2e');
-  bg.addColorStop(0.5, '#0d0520');
-  bg.addColorStop(1, '#050010');
+  // 统一模板背景 — 紫金渐变（比之前亮很多）
+  const bg = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w * 0.75);
+  bg.addColorStop(0, '#3a1a6e');
+  bg.addColorStop(0.5, '#1e0a40');
+  bg.addColorStop(1, '#0a0020');
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, w, h);
 
-  // 外边框 — 金
-  ctx.strokeStyle = '#ffd70025';
-  ctx.lineWidth = 2;
+  // 金色外边框
+  ctx.strokeStyle = '#ffd70040';
+  ctx.lineWidth = 2.5;
   ctx.roundRect(6, 6, w - 12, h - 12, 14);
   ctx.stroke();
 
-  // 内边框 — 紫
-  ctx.strokeStyle = '#7b4fbf30';
-  ctx.lineWidth = 1;
-  ctx.roundRect(12, 12, w - 24, h - 24, 12);
+  // 紫色内边框
+  ctx.strokeStyle = '#c9a0ff25';
+  ctx.lineWidth = 1.2;
+  ctx.roundRect(13, 13, w - 26, h - 26, 12);
   ctx.stroke();
 
-  // 神秘符文纹理 — 基于seed生成
-  const rng = mulberry32(seed * 7331 + 99);
-  ctx.strokeStyle = '#c9a0ff15';
-  ctx.lineWidth = 0.5;
-  for (let i = 0; i < 12; i++) {
-    const x = rnd(rng, 30, w - 30);
-    const y = rnd(rng, 40, h - 40);
-    const r = rnd(rng, 8, 20);
+  // 装饰角花纹
+  const cornerSize = 16;
+  ctx.strokeStyle = '#ffd70025';
+  ctx.lineWidth = 1;
+  const corners = [[18,18], [w-18,18], [18,h-18], [w-18,h-18]];
+  corners.forEach(([cx, cy]) => {
     ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.moveTo(cx - cornerSize/2, cy);
+    ctx.lineTo(cx, cy - cornerSize/2);
+    ctx.lineTo(cx + cornerSize/2, cy);
+    ctx.lineTo(cx, cy + cornerSize/2);
+    ctx.closePath();
     ctx.stroke();
-    // 小点
-    ctx.fillStyle = '#c9a0ff10';
+    ctx.fillStyle = '#ffd70010';
+    ctx.fill();
+  });
+
+  // ─── 调用对应插画函数 ───
+  const cardId = seed % 12;
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(22, 50, w - 44, h - 100, 10);
+  ctx.clip();
+  drawBackIllustration(ctx, w, h, cardId);
+  ctx.restore();
+
+  // 插画区金色边框
+  ctx.strokeStyle = '#ffd70020';
+  ctx.lineWidth = 1;
+  ctx.roundRect(22, 50, w - 44, h - 100, 10);
+  ctx.stroke();
+
+  // 顶部符号（更大更亮）
+  ctx.fillStyle = '#ffd700';
+  ctx.font = 'bold 18px serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(CARDS[cardId].symbol, w / 2, 38);
+
+  // 底部牌名小字
+  ctx.fillStyle = '#c9a0ff50';
+  ctx.font = '10px serif';
+  ctx.fillText(CARDS[cardId].name, w / 2, h - 14);
+
+  ctx.restore();
+}
+
+// ─── 牌背插画分发 ───
+function drawBackIllustration(ctx, w, h, id) {
+  const cx = w / 2, cy = h / 2 + 25;
+  switch (id) {
+    case 0: drawBackTraveler(ctx, w, h, cx, cy); break;
+    case 1: drawBackMoon(ctx, w, h, cx, cy); break;
+    case 2: drawBackStar(ctx, w, h, cx, cy); break;
+    case 3: drawBackSea(ctx, w, h, cx, cy); break;
+    case 4: drawBackCrown(ctx, w, h, cx, cy); break;
+    case 5: drawBackThorn(ctx, w, h, cx, cy); break;
+    case 6: drawBackClock(ctx, w, h, cx, cy); break;
+    case 7: drawBackScale(ctx, w, h, cx, cy); break;
+    case 8: drawBackButterfly(ctx, w, h, cx, cy); break;
+    case 9: drawBackMirror(ctx, w, h, cx, cy); break;
+    case 10: drawBackLighthouse(ctx, w, h, cx, cy); break;
+    case 11: drawBackWheel(ctx, w, h, cx, cy); break;
+  }
+}
+
+// ─── 0: 旅者牌背 — 旷野星空下的道路 ───
+function drawBackTraveler(ctx, w, h, cx, cy) {
+  // 夜空
+  const sky = ctx.createLinearGradient(0, 0, 0, h);
+  sky.addColorStop(0, '#0d0530');
+  sky.addColorStop(0.5, '#1a0850');
+  sky.addColorStop(1, '#2a1050');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, w, h);
+
+  // 星星（亮点）
+  for (let i = 0; i < 30; i++) {
+    ctx.fillStyle = `rgba(255,255,255,${0.3 + Math.random() * 0.5})`;
     ctx.beginPath();
-    ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+    ctx.arc(Math.random() * w, Math.random() * h * 0.6, 0.8 + Math.random() * 1.5, 0, Math.PI*2);
     ctx.fill();
   }
 
-  // 十字纹路线
-  for (let i = 0; i < 3; i++) {
-    const x = rnd(rng, 40, w - 40);
-    const y = rnd(rng, 50, h - 50);
-    ctx.strokeStyle = '#c9a0ff08';
-    ctx.lineWidth = 0.5;
+  // 大地弧线
+  ctx.fillStyle = '#150830';
+  ctx.beginPath();
+  ctx.moveTo(0, h * 0.65);
+  ctx.quadraticCurveTo(w * 0.5, h * 0.55, w, h * 0.7);
+  ctx.lineTo(w, h); ctx.lineTo(0, h);
+  ctx.fill();
+
+  // 蜿蜒道路 — 金色光
+  ctx.strokeStyle = '#ffd70060';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(cx - 20, h * 0.6);
+  ctx.quadraticCurveTo(cx - 10, h * 0.7, cx + 15, h * 0.75);
+  ctx.quadraticCurveTo(cx + 40, h * 0.8, cx + 50, h);
+  ctx.stroke();
+
+  // 旅行者剪影
+  ctx.fillStyle = '#2a1050';
+  ctx.beginPath(); ctx.arc(cx - 15, h * 0.58, 5, 0, Math.PI*2); ctx.fill();
+  ctx.fillRect(cx - 17, h * 0.58 + 4, 8, 12);
+
+  // 大月亮
+  ctx.fillStyle = '#ffd70050';
+  ctx.beginPath(); ctx.arc(cx + 35, h * 0.25, 18, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#1a0850';
+  ctx.beginPath(); ctx.arc(cx + 40, h * 0.22, 15, 0, Math.PI*2); ctx.fill();
+}
+
+// ─── 1: 月影牌背 — 月光白狐 ───
+function drawBackMoon(ctx, w, h, cx, cy) {
+  const sky2 = ctx.createRadialGradient(cx, cy - 25, 0, cx, cy - 25, w * 0.6);
+  sky2.addColorStop(0, '#3a2060');
+  sky2.addColorStop(0.5, '#1a0840');
+  sky2.addColorStop(1, '#080020');
+  ctx.fillStyle = sky2;
+  ctx.fillRect(0, 0, w, h);
+
+  // 满月
+  ctx.fillStyle = '#ffecb320';
+  ctx.beginPath(); ctx.arc(cx, cy - 28, 30, 0, Math.PI*2); ctx.fill();
+  // 月面纹理
+  ctx.fillStyle = '#ffe0a010';
+  ctx.beginPath(); ctx.arc(cx - 8, cy - 35, 8, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + 10, cy - 20, 6, 0, Math.PI*2); ctx.fill();
+
+  // 白狐 — 身体
+  ctx.fillStyle = '#e0d0ff40';
+  ctx.beginPath(); ctx.ellipse(cx, cy + 15, 22, 12, 0, 0, Math.PI*2); ctx.fill();
+  // 头
+  ctx.beginPath(); ctx.ellipse(cx + 18, cy + 5, 9, 8, 0.2, 0, Math.PI*2); ctx.fill();
+  // 耳朵
+  ctx.fillStyle = '#e0d0ff50';
+  ctx.beginPath(); ctx.moveTo(cx+22, cy-2); ctx.lineTo(cx+25, cy-8); ctx.lineTo(cx+27, cy); ctx.fill();
+  // 尾巴
+  ctx.strokeStyle = '#e0d0ff30'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(cx-20, cy+12); ctx.quadraticCurveTo(cx-38, cy, cx-32, cy-10); ctx.stroke();
+  // 眼睛光点
+  ctx.fillStyle = '#ffd70080';
+  ctx.beginPath(); ctx.arc(cx+20, cy+3, 2, 0, Math.PI*2); ctx.fill();
+}
+
+// ─── 2: 星火牌背 — 燃烧的火花 ───
+function drawBackStar(ctx, w, h, cx, cy) {
+  ctx.fillStyle = '#080018';
+  ctx.fillRect(0, 0, w, h);
+
+  // 火花核心
+  const core = ctx.createRadialGradient(cx, cy, 0, cx, cy, 40);
+  core.addColorStop(0, '#ffffff');
+  core.addColorStop(0.1, '#ffd700');
+  core.addColorStop(0.3, '#ff8c00');
+  core.addColorStop(0.5, '#ff440060');
+  core.addColorStop(1, 'transparent');
+  ctx.fillStyle = core;
+  ctx.beginPath(); ctx.arc(cx, cy, 40, 0, Math.PI*2); ctx.fill();
+
+  // 射线
+  for (let i = 0; i < 16; i++) {
+    const a = (i/16)*Math.PI*2;
+    const len = 25 + Math.random()*30;
+    ctx.strokeStyle = `rgba(255,200,80,${0.1+Math.random()*0.2})`;
+    ctx.lineWidth = 0.5 + Math.random();
     ctx.beginPath();
-    ctx.moveTo(x - 8, y);
-    ctx.lineTo(x + 8, y);
-    ctx.moveTo(x, y - 8);
-    ctx.lineTo(x, y + 8);
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx+Math.cos(a)*len, cy+Math.sin(a)*len*0.6);
     ctx.stroke();
   }
 
-  // 中心水晶图腾 — 菱形
-  const cx = w / 2, cy = h / 2;
+  // 漂浮火花
+  for (let i=0;i<20;i++) {
+    ctx.fillStyle = `rgba(255,${180+Math.random()*75},${20+Math.random()*40},${0.3+Math.random()*0.6})`;
+    ctx.beginPath();
+    ctx.arc(cx+(Math.random()-0.5)*90, cy+(Math.random()-0.5)*70, 1+Math.random()*3, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+
+// ─── 3: 深海牌背 — 海底光柱 ───
+function drawBackSea(ctx, w, h, cx, cy) {
+  const sea = ctx.createLinearGradient(0, 0, 0, h);
+  sea.addColorStop(0, '#010818');
+  sea.addColorStop(0.5, '#082040');
+  sea.addColorStop(1, '#0a2050');
+  ctx.fillStyle = sea;
+  ctx.fillRect(0, 0, w, h);
+
+  // 光柱
+  for (let i=0;i<3;i++) {
+    const bx = cx-25+i*25;
+    const beam = ctx.createLinearGradient(bx, 0, bx, h);
+    beam.addColorStop(0, '#4488ff10');
+    beam.addColorStop(0.4, '#4488ff30');
+    beam.addColorStop(0.7, '#4488ff08');
+    beam.addColorStop(1, 'transparent');
+    ctx.fillStyle = beam;
+    ctx.fillRect(bx-15, 0, 30, h);
+  }
+
+  // 气泡
+  for (let i=0;i<15;i++) {
+    ctx.strokeStyle = '#88bbff20';
+    ctx.lineWidth = 0.5;
+    const bx = cx+(Math.random()-0.5)*70;
+    ctx.beginPath();
+    ctx.arc(bx, Math.random()*h, 3+Math.random()*5, 0, Math.PI*2);
+    ctx.stroke();
+  }
+
+  // 鱼群剪影
+  ctx.fillStyle = '#4488ff25';
+  for (let i=0;i<6;i++) {
+    const fx = cx-35+i*14;
+    const fy = cy-5+Math.sin(i)*8;
+    ctx.beginPath();
+    ctx.moveTo(fx+6, fy);
+    ctx.lineTo(fx-3, fy-2.5);
+    ctx.lineTo(fx-3, fy+2.5);
+    ctx.fill();
+  }
+}
+
+// ─── 4: 王冠牌背 — 悬浮光之王冠 ───
+function drawBackCrown(ctx, w, h, cx, cy) {
+  const crownBg = ctx.createRadialGradient(cx, cy-10, 0, cx, cy-10, w*0.5);
+  crownBg.addColorStop(0, '#3a2060');
+  crownBg.addColorStop(1, '#080018');
+  ctx.fillStyle = crownBg;
+  ctx.fillRect(0, 0, w, h);
+
+  // 光芒
+  for (let i=0;i<12;i++) {
+    const a = (i/12)*Math.PI*2;
+    ctx.strokeStyle = '#ffd70008';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy-10);
+    ctx.lineTo(cx+Math.cos(a)*50, cy-10+Math.sin(a)*50);
+    ctx.stroke();
+  }
+
+  // 王冠
+  ctx.fillStyle = '#ffd700';
+  ctx.fillRect(cx-30, cy+15, 60, 14);
+  for (let i=0;i<5;i++) {
+    ctx.beginPath();
+    ctx.moveTo(cx-28+i*15, cy+15);
+    ctx.lineTo(cx-25+i*15, cy-18);
+    ctx.lineTo(cx-17+i*15, cy+15);
+    ctx.fill();
+  }
+  // 宝石
+  ctx.fillStyle = '#7A3CFF';
+  ctx.beginPath(); ctx.arc(cx, cy-2, 6, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#c9a0ff40';
+  ctx.beginPath(); ctx.arc(cx, cy-2, 3, 0, Math.PI*2); ctx.fill();
+
+  // 光晕
+  const halo = ctx.createRadialGradient(cx, cy-5, 8, cx, cy-5, 40);
+  halo.addColorStop(0, '#ffd70030'); halo.addColorStop(1, 'transparent');
+  ctx.fillStyle = halo;
+  ctx.beginPath(); ctx.arc(cx, cy-5, 40, 0, Math.PI*2); ctx.fill();
+}
+
+// ─── 5: 荆棘牌背 — 开花的荆棘藤 ───
+function drawBackThorn(ctx, w, h, cx, cy) {
+  ctx.fillStyle = '#0a0018';
+  ctx.fillRect(0, 0, w, h);
+
+  // 藤蔓螺旋
+  ctx.strokeStyle = '#3a8050';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  for (let t=0; t<Math.PI*2.5; t+=0.12) {
+    const r = 18 + t*8;
+    const x = cx+Math.cos(t*2)*r*0.5;
+    const y = cy+10+Math.sin(t*1.5)*r*0.4;
+    if (t===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+
+  // 刺
+  ctx.strokeStyle = '#7b4fbf50'; ctx.lineWidth = 1;
+  for (let i=0;i<12;i++) {
+    const a = (i/12)*Math.PI*2.5;
+    const r = 18+i*7;
+    const x = cx+Math.cos(a*2)*r*0.5;
+    const y = cy+10+Math.sin(a*1.5)*r*0.4;
+    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+4,y-4); ctx.stroke();
+  }
+
+  // 花 — 紫色五瓣
+  ctx.fillStyle = '#c9a0ff60';
+  for (let i=0;i<5;i++) {
+    const a = (i/5)*Math.PI*2;
+    ctx.beginPath();
+    ctx.arc(cx+Math.cos(a)*12, cy+8+Math.sin(a)*12, 6, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.fillStyle = '#ffd70080';
+  ctx.beginPath(); ctx.arc(cx, cy+8, 4, 0, Math.PI*2); ctx.fill();
+
+  // 发光粒子
+  for (let i=0;i<8;i++) {
+    ctx.fillStyle = '#ffd70020';
+    ctx.beginPath();
+    ctx.arc(cx+(Math.random()-0.5)*60, cy+(Math.random()-0.5)*50, 1.5, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+
+// ─── 6: 时钟牌背 — 金色齿轮钟面 ───
+function drawBackClock(ctx, w, h, cx, cy) {
+  ctx.fillStyle = '#0a0018';
+  ctx.fillRect(0, 0, w, h);
+
+  // 钟面大圆
+  ctx.strokeStyle = '#ffd70030'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(cx, cy, 38, 0, Math.PI*2); ctx.stroke();
+  ctx.strokeStyle = '#c9a0ff20'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(cx, cy, 34, 0, Math.PI*2); ctx.stroke();
+
+  // 罗马数字
+  ctx.fillStyle = '#ffd70040'; ctx.font = 'bold 13px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  const romans = ['XII','I','II','III','IV','V','VI','VII','VIII','IX','X','XI'];
+  for (let i=0;i<12;i++) {
+    const a = (i/12)*Math.PI*2 - Math.PI/2;
+    ctx.fillText(romans[i], cx+Math.cos(a)*26, cy+Math.sin(a)*26);
+  }
+
+  // 指针
+  ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx,cy-22); ctx.stroke();
+  ctx.strokeStyle = '#ffd70060'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+16,cy+6); ctx.stroke();
+
+  // 周围齿轮
+  ctx.strokeStyle = '#c9a0ff15'; ctx.lineWidth = 1;
+  for (let i=0;i<3;i++) {
+    const gx = cx+(Math.cos(i*2.1)*42);
+    const gy = cy+(Math.sin(i*2.1)*42);
+    ctx.beginPath(); ctx.arc(gx, gy, 6, 0, Math.PI*2); ctx.stroke();
+  }
+
+  // 中心宝石
+  ctx.fillStyle = '#7A3CFF';
+  ctx.beginPath(); ctx.arc(cx, cy, 4, 0, Math.PI*2); ctx.fill();
+}
+
+// ─── 7: 天秤牌背 — 星空天平 ───
+function drawBackScale(ctx, w, h, cx, cy) {
+  const sbg = ctx.createRadialGradient(cx, cy, 0, cx, cy, w*0.5);
+  sbg.addColorStop(0, '#2a1850'); sbg.addColorStop(1, '#080018');
+  ctx.fillStyle = sbg; ctx.fillRect(0,0,w,h);
+
+  // 中心柱
+  ctx.strokeStyle = '#c9a0ff40'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(cx,cy+30); ctx.lineTo(cx,cy-35); ctx.stroke();
+
+  // 横梁
+  ctx.strokeStyle = '#ffd70040'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(cx-38,cy-18); ctx.lineTo(cx+38,cy-20); ctx.stroke();
+
+  // 左盘 — 羽毛
+  ctx.strokeStyle = '#c9a0ff30'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(cx-38, cy-8, 14, Math.PI, 0); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx-52,cy-8); ctx.lineTo(cx-38,cy-18); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx-24,cy-8); ctx.lineTo(cx-38,cy-18); ctx.stroke();
+  ctx.fillStyle = '#ffd70030';
+  ctx.beginPath(); ctx.ellipse(cx-38,cy-8,7,4,0.1,0,Math.PI*2); ctx.fill();
+
+  // 右盘 — 宝石
+  ctx.strokeStyle = '#c9a0ff30';
+  ctx.beginPath(); ctx.arc(cx+38, cy-10, 14, Math.PI, 0); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx+24,cy-10); ctx.lineTo(cx+38,cy-20); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx+52,cy-10); ctx.lineTo(cx+38,cy-20); ctx.stroke();
+  ctx.fillStyle = '#7A3CFF40';
+  ctx.beginPath(); ctx.ellipse(cx+38,cy-10,6,5,0,0,Math.PI*2); ctx.fill();
+
+  // 底座
+  ctx.fillStyle = '#c9a0ff20';
+  ctx.fillRect(cx-10,cy+30,20,6);
+  ctx.beginPath(); ctx.ellipse(cx,cy+36,14,4,0,0,Math.PI*2); ctx.fill();
+}
+
+// ─── 8: 蝴蝶牌背 — 发光的紫蝶 ───
+function drawBackButterfly(ctx, w, h, cx, cy) {
+  const bbg = ctx.createRadialGradient(cx, cy, 0, cx, cy, w*0.6);
+  bbg.addColorStop(0, '#3a2060'); bbg.addColorStop(1, '#080018');
+  ctx.fillStyle = bbg; ctx.fillRect(0,0,w,h);
+
+  // 光点轨迹
+  for (let i=0;i<20;i++) {
+    ctx.fillStyle = `rgba(255,215,0,${0.1+Math.random()*0.3})`;
+    ctx.beginPath();
+    ctx.arc(cx+(Math.random()-0.5)*70, cy+(Math.random()-0.5)*60, 1.5, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  // 蝴蝶翅
+  ctx.fillStyle = '#c9a0ff40';
+  ctx.beginPath(); ctx.ellipse(cx-14,cy-10,16,12,-0.25,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx+14,cy-10,16,12,0.25,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx-9,cy+3,10,8,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx+9,cy+3,10,8,0,0,Math.PI*2); ctx.fill();
+
+  // 翅纹
+  ctx.strokeStyle = '#ffd70020'; ctx.lineWidth = 0.8;
+  ctx.beginPath(); ctx.ellipse(cx-14,cy-10,10,7,-0.25,0,Math.PI*2); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(cx+14,cy-10,10,7,0.25,0,Math.PI*2); ctx.stroke();
+
+  // 身体
+  ctx.fillStyle = '#c9a0ff60';
+  ctx.beginPath(); ctx.ellipse(cx,cy,3.5,16,0,0,Math.PI*2); ctx.fill();
+
+  // 茧（下方）
   ctx.strokeStyle = '#c9a0ff20';
-  ctx.lineWidth = 1;
-  const d = rnd(rng, 28, 40);
+  ctx.beginPath(); ctx.ellipse(cx,cy+25,6,10,-0.1,0,Math.PI*2); ctx.stroke();
+  // 破茧光线
+  ctx.strokeStyle = '#ffd70010';
+  for (let i=0;i<4;i++) {
+    const a = -Math.PI/2 + (i-1.5)*0.3;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy+22);
+    ctx.lineTo(cx+Math.cos(a)*25, cy+22+Math.sin(a)*25);
+    ctx.stroke();
+  }
+}
+
+// ─── 9: 镜面牌背 — 神秘裂镜 ───
+function drawBackMirror(ctx, w, h, cx, cy) {
+  ctx.fillStyle = '#0a0018';
+  ctx.fillRect(0,0,w,h);
+
+  // 镜框
+  ctx.strokeStyle = '#ffd70030'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.ellipse(cx,cy,32,44,0,0,Math.PI*2); ctx.stroke();
+  ctx.strokeStyle = '#c9a0ff20'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.ellipse(cx,cy,29,41,0,0,Math.PI*2); ctx.stroke();
+
+  // 镜面 — 亮紫反射
+  const m = ctx.createLinearGradient(cx-28,cy,cx+28,cy);
+  m.addColorStop(0,'#1a0a30');
+  m.addColorStop(0.3,'#c9a0ff25');
+  m.addColorStop(0.5,'#e0d0ff40');
+  m.addColorStop(0.7,'#c9a0ff25');
+  m.addColorStop(1,'#1a0a30');
+  ctx.fillStyle = m;
+  ctx.beginPath(); ctx.ellipse(cx,cy,27,39,0,0,Math.PI*2); ctx.fill();
+
+  // 裂痕 — 金光
+  ctx.strokeStyle = '#ffd70030'; ctx.lineWidth = 0.8;
   ctx.beginPath();
-  ctx.moveTo(cx, cy - d);
-  ctx.lineTo(cx + d * 0.55, cy);
-  ctx.lineTo(cx, cy + d);
-  ctx.lineTo(cx - d * 0.55, cy);
-  ctx.closePath();
+  ctx.moveTo(cx-10,cy-35);
+  ctx.lineTo(cx+3,cy+5);
+  ctx.lineTo(cx-14,cy+32);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(cx+5,cy-28);
+  ctx.lineTo(cx-2,cy+5);
+  ctx.lineTo(cx+18,cy+28);
   ctx.stroke();
 
-  // 内菱形
-  ctx.strokeStyle = '#c9a0ff10';
+  // 光点反射
+  ctx.fillStyle = '#ffd70020';
+  ctx.beginPath(); ctx.arc(cx+6,cy-6,9,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#ffffff10';
+  ctx.beginPath(); ctx.arc(cx+8,cy-8,4,0,Math.PI*2); ctx.fill();
+}
+
+// ─── 10: 灯塔牌背 — 暴风雨灯塔 ───
+function drawBackLighthouse(ctx, w, h, cx, cy) {
+  // 暴风雨天空
+  const sky = ctx.createLinearGradient(0,0,0,h);
+  sky.addColorStop(0,'#060818'); sky.addColorStop(0.5,'#0c1535'); sky.addColorStop(1,'#101840');
+  ctx.fillStyle = sky; ctx.fillRect(0,0,w,h);
+
+  // 雨线
+  ctx.strokeStyle = '#4488ff10'; ctx.lineWidth = 0.5;
+  for (let i=0;i<25;i++) {
+    const rx = Math.random()*w;
+    ctx.beginPath();
+    ctx.moveTo(rx, Math.random()*h*0.3);
+    ctx.lineTo(rx-10, Math.random()*h*0.3+25);
+    ctx.stroke();
+  }
+
+  // 海面
+  ctx.fillStyle = '#0a1530';
+  ctx.fillRect(0,h*0.55,w,h*0.45);
+
+  // 灯塔
+  ctx.fillStyle = '#2a2a40';
+  ctx.fillRect(cx-9, cy-25, 18, 50);
+  ctx.fillStyle = '#c9a0ff20';
+  ctx.fillRect(cx-6, cy-25, 12, 6);
+  ctx.fillStyle = '#ffd70030';
+  ctx.fillRect(cx-15, cy-28, 30, 8);
+
+  // 灯塔光 — 强烈
+  const beam = ctx.createRadialGradient(cx, cy-30, 0, cx, cy-30, 45);
+  beam.addColorStop(0,'#ffffff');
+  beam.addColorStop(0.1,'#ffd700');
+  beam.addColorStop(0.35,'#ff8c0040');
+  beam.addColorStop(0.6,'#ff440005');
+  beam.addColorStop(1,'transparent');
+  ctx.fillStyle = beam;
+  ctx.beginPath(); ctx.arc(cx,cy-30,45,0,Math.PI*2); ctx.fill();
+
+  // 光柱照射
+  const pbeam = ctx.createLinearGradient(cx,cy-30,cx-50,h);
+  pbeam.addColorStop(0,'#ffd70025'); pbeam.addColorStop(1,'transparent');
+  ctx.fillStyle = pbeam;
   ctx.beginPath();
-  ctx.moveTo(cx, cy - d * 0.5);
-  ctx.lineTo(cx + d * 0.27, cy);
-  ctx.lineTo(cx, cy + d * 0.5);
-  ctx.lineTo(cx - d * 0.27, cy);
-  ctx.closePath();
+  ctx.moveTo(cx-4,cy-30); ctx.lineTo(cx-55,h); ctx.lineTo(cx-25,h); ctx.lineTo(cx+4,cy-30);
+  ctx.fill();
+
+  // 海浪
+  ctx.strokeStyle = '#4488ff25'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let x=0;x<w;x+=4) {
+    const y = h*0.55 + Math.sin(x*0.06)*7 + Math.sin(x*0.15)*4;
+    if (x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
   ctx.stroke();
+}
 
-  // 四角符号 — 根据seed变化
-  const corners = [
-    [25, 25], [w - 25, 25], [25, h - 25], [w - 25, h - 25],
-  ];
-  const cSyms = ['✦', '⧖', '◈', '⫸', '⬡', '◉', '≋', '⧊'];
-  ctx.fillStyle = '#c9a0ff18';
-  ctx.font = '10px serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  corners.forEach(([cx2, cy2]) => {
-    ctx.fillText(cSyms[Math.floor(rng() * cSyms.length)], cx2, cy2);
-  });
+// ─── 11: 命运轮牌背 — 旋转命运之轮 ───
+function drawBackWheel(ctx, w, h, cx, cy) {
+  const wbg = ctx.createRadialGradient(cx,cy,0,cx,cy,w*0.55);
+  wbg.addColorStop(0,'#3a2060'); wbg.addColorStop(1,'#080018');
+  ctx.fillStyle = wbg; ctx.fillRect(0,0,w,h);
 
-  // 顶部符号
-  ctx.fillStyle = '#c9a0ff30';
-  ctx.font = '16px serif';
-  ctx.fillText(CARDS[seed % 12].symbol, w / 2, 30);
+  // 外圈
+  ctx.strokeStyle = '#ffd70025'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(cx,cy,36,0,Math.PI*2); ctx.stroke();
+  ctx.strokeStyle = '#c9a0ff15'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(cx,cy,32,0,Math.PI*2); ctx.stroke();
 
-  ctx.restore();
+  // 辐条
+  for (let i=0;i<12;i++) {
+    const a = (i/12)*Math.PI*2;
+    ctx.strokeStyle = i%3===0 ? '#ffd70015' : '#c9a0ff08';
+    ctx.lineWidth = i%3===0 ? 1.2 : 0.5;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.lineTo(cx+Math.cos(a)*34, cy+Math.sin(a)*34);
+    ctx.stroke();
+  }
+
+  // 内圈
+  ctx.strokeStyle = '#ffd70030'; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.arc(cx,cy,16,0,Math.PI*2); ctx.stroke();
+
+  // 中心宝石
+  const gem = ctx.createRadialGradient(cx,cy,0,cx,cy,8);
+  gem.addColorStop(0,'#ffffff'); gem.addColorStop(0.3,'#ffd700'); gem.addColorStop(0.7,'#7A3CFF'); gem.addColorStop(1,'#2E004F');
+  ctx.fillStyle = gem;
+  ctx.beginPath(); ctx.arc(cx,cy,7,0,Math.PI*2); ctx.fill();
+
+  // 光晕
+  const halo = ctx.createRadialGradient(cx,cy,20,cx,cy,50);
+  halo.addColorStop(0,'#ffd70015'); halo.addColorStop(1,'transparent');
+  ctx.fillStyle = halo;
+  ctx.beginPath(); ctx.arc(cx,cy,50,0,Math.PI*2); ctx.fill();
+
+  // 轨道符号
+  const wsyms = ['✦','☽','♛','⧖','⚖','◈'];
+  ctx.fillStyle = '#ffd70025'; ctx.font = '10px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  for (let i=0;i<6;i++) {
+    const a = (i/6)*Math.PI*2;
+    ctx.fillText(wsyms[i], cx+Math.cos(a)*28, cy+Math.sin(a)*28);
+  }
 }
 
 export function drawCardFront(ctx, w, h, cardId) {
