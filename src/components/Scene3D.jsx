@@ -3,9 +3,9 @@ import * as THREE from 'three';
 import gsap from 'gsap';
 import { CARDS, drawCardBack, drawCardFront } from '../data/cards';
 
-const CARD_W = 2.8;
-const CARD_H = 4.2;
-const ORBIT_R = 3.2;
+const CARD_W = 2.4;
+const CARD_H = 3.6;
+const ORBIT_R = 5.5;
 const CARD_COUNT = 12;
 
 export default function Scene3D({
@@ -161,7 +161,7 @@ export default function Scene3D({
     scene.fog = new THREE.FogExp2('#050010', 0.00025);
 
     const camera = new THREE.PerspectiveCamera(55, container.clientWidth / container.clientHeight, 0.3, 30);
-    camera.position.set(0, 1.6, 8.5);
+    camera.position.set(0, 2.0, 12);
     camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -187,9 +187,9 @@ export default function Scene3D({
     const starPos = new Float32Array(starCount * 3);
     const starColors = new Float32Array(starCount * 3);
     for (let i = 0; i < starCount; i++) {
-      starPos[i * 3] = (Math.random() - 0.5) * 22;
-      starPos[i * 3 + 1] = (Math.random() - 0.5) * 16;
-      starPos[i * 3 + 2] = (Math.random() - 0.5) * 12;
+      starPos[i * 3] = (Math.random() - 0.5) * 30;
+      starPos[i * 3 + 1] = (Math.random() - 0.5) * 20;
+      starPos[i * 3 + 2] = (Math.random() - 0.5) * 16;
       const c = new THREE.Color().setHSL(0.75 + Math.random() * 0.15, 0.6, 0.5 + Math.random() * 0.5);
       starColors[i * 3] = c.r;
       starColors[i * 3 + 1] = c.g;
@@ -259,7 +259,7 @@ export default function Scene3D({
     particlesRef.current = orbPartData;
 
     // ─── Ground glow ───
-    const groundGeo = new THREE.PlaneGeometry(7, 7);
+    const groundGeo = new THREE.PlaneGeometry(14, 14);
     const groundMat = new THREE.ShaderMaterial({
       uniforms: { uTime: { value: 0 }, uIntensity: { value: 0.5 } },
       vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
@@ -491,8 +491,8 @@ export default function Scene3D({
       }
 
       // Camera breath
-      ref.camera.position.x = Math.sin(time * 0.13) * 0.25;
-      ref.camera.position.y = 1.6 + Math.cos(time * 0.18) * 0.12;
+      ref.camera.position.x = Math.sin(time * 0.13) * 0.4;
+      ref.camera.position.y = 2.0 + Math.cos(time * 0.18) * 0.18;
       ref.camera.lookAt(0, 0.15, 0);
 
       ref.renderer.render(ref.scene, ref.camera);
